@@ -32,10 +32,10 @@ export async function setupTCPServer(root, srcDir, port = 6001,host='localhost')
       if (typeof register === 'function') {
         register({
           on: (route, handler,systemName='default') => {
-	      console.log(' system name',systemName);
+	      //console.log(' system name',systemName);
 		  if (!routesMap[systemName]) routesMap[systemName] = new Map();
             routesMap[systemName].set(route, handler);
-            console.log(`[+] TCP route '${route}' loaded for system=`+systemName);
+            //console.log(`[+] TCP route '${route}' loaded for system=`+systemName);
           }
         });
       }
@@ -166,8 +166,23 @@ export async function setupTCPServer(root, srcDir, port = 6001,host='localhost')
 export async function startDevServer({ root, srcDir, port,tcp,host }) {
   const app = express();
 
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+
+// Increase request size limit
+app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb',extended: true }));
+  
+
+// Add this after creating `app` and before any routes/middlewares
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204); // Preflight request
+  } else {
+    next();
+  }
+});
   
   await loadModules(path.join(root, srcDir, 'lib'), app);
   await loadModules(path.join(root, srcDir, 'api'), app);
@@ -217,8 +232,10 @@ export async function startDevServer({ root, srcDir, port,tcp,host }) {
 export async function startProdServer({ root, srcDir, port,tcp,host }) {
   const app = express();
 
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+
+// Increase request size limit
+app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb',extended: true }));
   app.use(express.static(path.join(root, 'dist/client'), { index: false }));
 
   await loadModules(path.join(root, srcDir, 'lib'), app);
