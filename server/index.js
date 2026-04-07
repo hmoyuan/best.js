@@ -7,6 +7,7 @@ import { createServer as createViteServer } from 'vite';
 import { loadModules } from '../utils/loadModules.js';
 import { fileURLToPath } from 'url';
 import net from 'net';
+import { toImportSpecifier } from '../utils/pathUtils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,7 +29,7 @@ export async function setupTCPServer(root, srcDir, port = 6001,host='localhost')
   if (fs.existsSync(defaultTcpDir)) {
     const tcpFiles = fs.readdirSync(defaultTcpDir).filter(f => f.endsWith('.js'));
     for (const file of tcpFiles) {
-      const { default: register } = await import(path.join(defaultTcpDir, file));
+      const { default: register } = await import(toImportSpecifier(path.join(defaultTcpDir, file)));
       if (typeof register === 'function') {
         register({
           on: (route, handler,systemName='default') => {
@@ -47,7 +48,7 @@ export async function setupTCPServer(root, srcDir, port = 6001,host='localhost')
   const authModulePath = path.join(root, srcDir, 'lib', 'auth_tcp.js');
   let authFn = null;
   if (fs.existsSync(authModulePath)) {
-    const { default: auth } = await import(authModulePath);
+    const { default: auth } = await import(toImportSpecifier(authModulePath));
     if (typeof auth === 'function') authFn = auth;
   } else {
     console.warn('[!] No auth function found in lib/auth_tcp.js');
@@ -251,7 +252,7 @@ app.use(express.json({ limit: '50mb' }));
 
     try {
       const template = fs.readFileSync(path.join(root, 'dist/client/index.html'), 'utf-8');
-      const { render } = await import(path.join(root, 'dist/server/entry-server.js'));
+      const { render } = await import(toImportSpecifier(path.join(root, 'dist/server/entry-server.js')));
       const extraProps = { now: new Date().toISOString() };
       const { html: appHtml, title } = await render(page, extraProps);
 

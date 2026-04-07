@@ -304,4 +304,29 @@ export default App;
 * Dev mode uses Vite middleware; production mode serves from `dist/client` and dynamically renders pages.
 * API, Lib, and TCP modules are hot-loaded during development.
 
+---
+
+## 🔧 Windows ESM Compatibility
+
+Best.js includes built-in support for Windows ESM dynamic imports. The framework automatically converts absolute file paths to `file://` URLs when using dynamic imports, ensuring compatibility across all platforms (Windows, Linux, macOS).
+
+**What this means for you:**
+
+* No manual path conversion needed when working with absolute paths
+* The same code works seamlessly on Windows, Linux, and macOS
+* Dynamic imports from `src/api`, `src/lib`, `src/tcp`, and production server builds all work out-of-the-box
+
+**Technical Details:**
+
+The fix uses Node.js's `pathToFileURL` to convert absolute paths (like `C:\path\to\file.js` on Windows) to proper `file://` URLs that the ESM loader requires. Relative paths and package names are left unchanged.
+
+**Testing:**
+
+The fix includes comprehensive tests that verify:
+
+```bash
+npm test
+```
+
+Tests cover Windows paths, Unix paths, relative paths, package names, and paths with special characters (like spaces).
 

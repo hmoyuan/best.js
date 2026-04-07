@@ -1,6 +1,7 @@
 // src/utils/loadModules.js
 import fs from 'fs';
 import path from 'path';
+import { toImportSpecifier } from './pathUtils.js';
 
 /**
  * Dynamically load modules from a folder.
@@ -14,7 +15,7 @@ export async function loadModules(dir, app) {
   const files = fs.readdirSync(dir).filter(f => f.endsWith('.js') || f.endsWith('.ts'));
   for (const file of files) {
     const modPath = path.join(dir, file);
-    const mod = await import(modPath);
+    const mod = await import(toImportSpecifier(modPath));
     if (typeof mod.default === 'function') {
       mod.default(app); // register API or lib
     }

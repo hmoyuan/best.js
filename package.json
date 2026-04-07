@@ -7,7 +7,7 @@
     "bestjsserver": "./bin/bestjsserver.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.4",
